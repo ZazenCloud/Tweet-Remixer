@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getSavedTweets, deleteSavedTweet, SavedTweet } from '../services/firebaseService';
+import { getSavedTweets, deleteSavedTweet, updateSavedTweet, SavedTweet } from '../services/firebaseService';
 import TweetButton from './TweetButton';
 
 interface SavedTweetsSidebarProps {
@@ -11,6 +11,8 @@ const SavedTweetsSidebar: React.FC<SavedTweetsSidebarProps> = ({ isOpen, onClose
   const [savedTweets, setSavedTweets] = useState<SavedTweet[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingTweetId, setEditingTweetId] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -45,6 +47,35 @@ const SavedTweetsSidebar: React.FC<SavedTweetsSidebarProps> = ({ isOpen, onClose
       console.error('Error deleting tweet:', err);
       alert('Error: Failed to delete tweet');
     }
+  };
+
+  const handleEditTweet = (tweet: SavedTweet) => {
+    if (tweet.id) {
+      setEditingTweetId(tweet.id);
+      setEditedContent(tweet.content);
+    }
+  };
+
+  const handleSaveEdit = async (tweetId: string) => {
+    try {
+      await updateSavedTweet(tweetId, editedContent);
+      setSavedTweets(currentTweets => 
+        currentTweets.map(tweet => 
+          tweet.id === tweetId 
+            ? { ...tweet, content: editedContent } 
+            : tweet
+        )
+      );
+      setEditingTweetId(null);
+    } catch (err) {
+      console.error('Error updating tweet:', err);
+      alert('Error: Failed to update tweet');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTweetId(null);
+    setEditedContent('');
   };
 
   return (
@@ -95,33 +126,90 @@ const SavedTweetsSidebar: React.FC<SavedTweetsSidebarProps> = ({ isOpen, onClose
                   animationDelay: `${index * 0.05}s` 
                 }}
               >
-                <p className="whitespace-pre-wrap text-gray-800 mb-3">{tweet.content}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <button
-                    onClick={() => tweet.id && handleDeleteTweet(tweet.id)}
-                    className="p-2 bg-red-50 text-red-500 rounded-lg border border-red-100 
-                      hover:bg-red-100 hover:shadow-md hover:scale-105
-                      transition-all duration-200 transform"
-                    title="Delete tweet"
-                  >
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="16" 
-                      height="16" 
-                      viewBox="0 0 24 24" 
-                      fill="none"
-                      stroke="currentColor" 
-                      strokeWidth="2"
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 6h18" />
-                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                    </svg>
-                  </button>
-                  <TweetButton textToCopy={tweet.content} />
-                </div>
+                {editingTweetId === tweet.id ? (
+                  <>
+                    <textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      className="w-full p-2 border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-3 resize-none"
+                      rows={3}
+                      maxLength={280}
+                    />
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs text-gray-500">{editedContent.length}/280</span>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={handleCancelEdit}
+                          className="px-4 py-2 rounded-lg bg-gray-50 text-gray-700 font-medium border border-gray-200
+                            hover:bg-gray-100 hover:shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
+                        >
+                          Cancel
+                        </button>
+                        <button 
+                          onClick={() => tweet.id && handleSaveEdit(tweet.id)}
+                          className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-400 to-emerald-400 text-white font-medium
+                            hover:from-green-500 hover:to-emerald-500 hover:shadow-md transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 button-bounce"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="whitespace-pre-wrap text-gray-800 mb-3">{tweet.content}</p>
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEditTweet(tweet)}
+                          className="p-2 bg-blue-50 text-blue-500 rounded-lg border border-blue-100 
+                            hover:bg-blue-100 hover:shadow-md hover:scale-105
+                            transition-all duration-200 transform"
+                          title="Edit tweet"
+                        >
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="16" 
+                            height="16" 
+                            viewBox="0 0 24 24" 
+                            fill="none"
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          >
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => tweet.id && handleDeleteTweet(tweet.id)}
+                          className="p-2 bg-red-50 text-red-500 rounded-lg border border-red-100 
+                            hover:bg-red-100 hover:shadow-md hover:scale-105
+                            transition-all duration-200 transform"
+                          title="Delete tweet"
+                        >
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            width="16" 
+                            height="16" 
+                            viewBox="0 0 24 24" 
+                            fill="none"
+                            stroke="currentColor" 
+                            strokeWidth="2"
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                          </svg>
+                        </button>
+                      </div>
+                      <TweetButton textToCopy={tweet.content} />
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>

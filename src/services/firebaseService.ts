@@ -10,7 +10,8 @@ import {
   serverTimestamp,
   query,
   orderBy,
-  Firestore
+  Firestore,
+  updateDoc
 } from 'firebase/firestore';
 
 // Firebase configuration - replace with your own config
@@ -85,8 +86,23 @@ export const deleteSavedTweet = async (tweetId: string): Promise<void> => {
   }
 };
 
+// Update a saved tweet
+export const updateSavedTweet = async (tweetId: string, newContent: string): Promise<void> => {
+  try {
+    const tweetDocRef = doc(db, 'savedTweets', tweetId);
+    await updateDoc(tweetDocRef, {
+      content: newContent,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating tweet:', error);
+    throw new Error('Failed to update tweet');
+  }
+};
+
 export default {
   saveTweet,
   getSavedTweets,
-  deleteSavedTweet
+  deleteSavedTweet,
+  updateSavedTweet
 }; 

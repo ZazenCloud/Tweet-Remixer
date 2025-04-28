@@ -4,6 +4,8 @@ import { GoogleGenAI } from "@google/genai";
 type RemixRequest = {
   text: string;
   style?: string; // Making style optional as we're not using it anymore
+  includeHashtags?: boolean;
+  includeEmojis?: boolean;
 };
 
 type RemixResponse = {
@@ -17,7 +19,8 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 // Initialize the Google GenAI client
 const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 
-const tweetFromPostPrompt = `
+const getPrompt = (includeHashtags: boolean, includeEmojis: boolean) => {
+  let prompt = `
 You are a social media expert and ghostwriter.
 
 You work for a popular blogger, and your job is to take their blog post and come up with a variety of
@@ -30,23 +33,36 @@ Remember: Tweets cannot be longer than 280 characters.
 
 Please return exactly 5 tweets, with each tweet separated by three dashes like this: "---"
 This format is important as it will be used to display each tweet in its own box on the website.
+`;
 
-Do not use any hashtags or emojis.
+  if (!includeHashtags) {
+    prompt += "\nDo not use any hashtags.";
+  } else {
+    prompt += "\nInclude 1-4 relevant hashtags in each tweet.";
+  }
 
-Here is the blog post:
+  if (!includeEmojis) {
+    prompt += "\nDo not use any emojis.";
+  } else {
+    prompt += "\nInclude 1-4 relevant emojis in each tweet to make them more engaging.";
+  }
 
-`
+  prompt += "\n\nHere is the blog post:\n\n";
+  
+  return prompt;
+};
 
 export const tweetsFromPost = async (request: RemixRequest): Promise<RemixResponse> => {
   if (!ai || !API_KEY) {
     throw new Error('Gemini API key is not configured. Please add your API key to the .env file with the name VITE_GEMINI_API_KEY.');
   }
 
-  const { text } = request;
+  const { text, includeHashtags = false, includeEmojis = false } = request;
   
   try {
-    // Construct prompt to generate 4 different tweet variations
-    const prompt = `${tweetFromPostPrompt} ${text}`;
+    // Construct prompt with user settings
+    const promptTemplate = getPrompt(includeHashtags, includeEmojis);
+    const prompt = `${promptTemplate} ${text}`;
     
     // Generate content using the models API
     const response = await ai.models.generateContent({

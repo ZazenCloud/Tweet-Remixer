@@ -7,6 +7,7 @@ import TweetButton from './components/TweetButton';
 import SaveTweetButton from './components/SaveTweetButton';
 import ErrorMessage from './components/ErrorMessage';
 import SavedTweetsSidebar from './components/SavedTweetsSidebar';
+import SettingsPopup from './components/SettingsPopup';
 
 function App() {
   const [inputText, setInputText] = useState('');
@@ -16,6 +17,9 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [includeHashtags, setIncludeHashtags] = useState(false);
+  const [includeEmojis, setIncludeEmojis] = useState(false);
 
   const handleRemix = async () => {
     if (!inputText.trim()) return;
@@ -27,9 +31,11 @@ function App() {
     setShowErrorPopup(false);
     
     try {
-      // Using our API service
+      // Using our API service with settings
       const response = await tweetsFromPost({
-        text: inputText
+        text: inputText,
+        includeHashtags,
+        includeEmojis
       });
 
       setOutputText(response.remixedText);
@@ -76,10 +82,14 @@ function App() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const toggleSettings = () => {
+    setIsSettingsOpen(!isSettingsOpen);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 font-sans">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
             Tweet Remixer
           </h1>
@@ -93,10 +103,6 @@ function App() {
             Saved Tweets
           </button>
         </div>
-        
-        <p className="text-gray-600 text-center mb-10 max-w-2xl mx-auto">
-          Create multiple engaging tweet variations from your original idea using AI
-        </p>
         
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-indigo-100 transition-all duration-300 hover:shadow-xl">
           <div className="mb-6">
@@ -183,8 +189,18 @@ function App() {
           )}
         </div>
         
-        <div className="mt-6 text-center text-gray-500 text-sm">
-          Powered by Google Gemini AI
+        <div className="mt-6 text-center">
+          <button 
+            onClick={toggleSettings}
+            className="text-gray-500 hover:text-indigo-600 transition-colors duration-200 inline-flex items-center gap-2"
+            aria-label="Settings"
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span className="text-sm">Settings</span>
+          </button>
         </div>
       </div>
 
@@ -217,6 +233,16 @@ function App() {
 
       {/* Saved Tweets Sidebar */}
       <SavedTweetsSidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+      {/* Settings Popup */}
+      <SettingsPopup 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        includeHashtags={includeHashtags}
+        includeEmojis={includeEmojis}
+        setIncludeHashtags={setIncludeHashtags}
+        setIncludeEmojis={setIncludeEmojis}
+      />
     </div>
   );
 }

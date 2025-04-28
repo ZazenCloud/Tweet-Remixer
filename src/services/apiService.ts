@@ -2,8 +2,8 @@
 import * as geminiApi from './geminiApi';
 
 // Export the Gemini API directly
-export const remixContent = geminiApi.remixContent;
+export const tweetsFromPost = geminiApi.tweetsFromPost;
 
 export default {
-  remixContent
+  tweetsFromPost
 }; 

@@ -52,3 +52,49 @@
     transform: rotate(360deg);
   }
 }
+
+/* Add animations for saved tweets sidebar */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+/* Add subtle animation for saved items */
+@keyframes slideIn {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.saved-item-animate {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Add subtle bounce animation for buttons */
+@keyframes subtleBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.button-bounce:hover {
+  animation: subtleBounce 0.3s ease-in-out;
+}

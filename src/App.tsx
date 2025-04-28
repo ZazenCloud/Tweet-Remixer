@@ -62,32 +62,37 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 font-sans">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8 text-indigo-600">Tweet Remixer</h1>
+        <h1 className="text-4xl font-extrabold text-center mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+          Tweet Remixer
+        </h1>
+        <p className="text-gray-600 text-center mb-10 max-w-2xl mx-auto">
+          Create multiple engaging tweet variations from your original idea using AI
+        </p>
         
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="bg-white p-8 rounded-2xl shadow-lg border border-indigo-100 transition-all duration-300 hover:shadow-xl">
           <div className="mb-6">
             <label htmlFor="inputText" className="block text-gray-700 font-medium mb-2">
               Enter text to generate tweet variations
             </label>
             <textarea
               id="inputText"
-              className="w-full h-40 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full h-40 p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 resize-none"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Enter the main idea or content for your tweets..."
             />
           </div>
           
-          <div className="flex gap-3 mb-6">
+          <div className="flex gap-4 mb-8">
             <button
               onClick={handleRemix}
               disabled={isLoading || !inputText.trim()}
-              className={`flex-1 py-3 rounded-md font-medium text-white transition-colors ${
+              className={`flex-1 py-3 px-6 rounded-xl font-medium text-white transition-all duration-200 transform ${
                 isLoading || !inputText.trim()
                   ? 'bg-indigo-300 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700'
+                  : 'bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0'
               }`}
             >
               {isLoading ? 'Generating Tweets...' : 'Generate 4 Tweets'}
@@ -96,44 +101,52 @@ function App() {
             <button
               onClick={handleClear}
               disabled={isLoading || (!inputText && !outputText && !error)}
-              className={`px-4 py-3 rounded-md font-medium transition-colors ${
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
                 isLoading || (!inputText && !outputText && !error)
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:-translate-y-0.5 hover:shadow-sm active:translate-y-0'
               }`}
             >
               Clear
             </button>
           </div>
           
-          {isLoading && <LoadingSpinner />}
+          {isLoading && (
+            <div className="flex justify-center my-12">
+              <LoadingSpinner />
+            </div>
+          )}
           
           {error && !showErrorPopup && <ErrorMessage message={error} />}
           
           {outputText && !isLoading && (
-            <div className="mt-8">
-              <div className="flex justify-between items-center mb-3">
+            <div className="mt-10 animate-fade-in">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-800">Tweet Variations:</h2>
                 <CopyButton textToCopy={outputText} />
               </div>
-              <div className="p-4 bg-gray-100 rounded-md whitespace-pre-wrap">
+              <div className="p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl whitespace-pre-wrap border border-indigo-100 shadow-inner">
                 {outputText}
               </div>
             </div>
           )}
         </div>
+        
+        <div className="mt-6 text-center text-gray-500 text-sm">
+          Powered by Google Gemini AI
+        </div>
       </div>
 
       {/* Error popup for API key issues */}
       {showErrorPopup && error && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white p-8 rounded-xl shadow-xl max-w-md w-full border border-red-100">
             <h2 className="text-xl font-bold text-red-600 mb-4">API Key Error</h2>
-            <p className="mb-6">{error}</p>
+            <p className="mb-6 text-gray-700">{error}</p>
             <div className="flex justify-end">
               <button 
                 onClick={closeErrorPopup}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-lg hover:from-indigo-700 hover:to-blue-600 transition-all duration-200 transform hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
               >
                 Close
               </button>

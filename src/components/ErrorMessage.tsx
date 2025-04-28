@@ -6,10 +6,10 @@ interface ErrorMessageProps {
 
 const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => {
   return (
-    <div className="p-4 my-4 bg-red-50 border border-red-200 text-red-600 rounded-md">
+    <div className="p-5 my-6 bg-red-50 border border-red-200 text-red-700 rounded-xl shadow-sm animate-fade-in">
       <div className="flex items-start">
         <svg 
-          className="w-5 h-5 mr-2 mt-0.5" 
+          className="w-5 h-5 mr-3 mt-0.5 text-red-500 flex-shrink-0" 
           fill="currentColor" 
           viewBox="0 0 20 20"
         >
@@ -19,7 +19,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ message }) => {
             clipRule="evenodd" 
           />
         </svg>
-        <span>{message}</span>
+        <span className="text-sm leading-relaxed">{message}</span>
       </div>
     </div>
   );

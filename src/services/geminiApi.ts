@@ -10,15 +10,15 @@ type RemixResponse = {
   remixedText: string;
 };
 
-// Get API key from environment variable
-const API_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
+// Get API key from environment variable using Vite's format
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // Initialize the Google GenAI client
 const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 
 export const remixContent = async (request: RemixRequest): Promise<RemixResponse> => {
   if (!ai || !API_KEY) {
-    throw new Error('Gemini API key is not configured. Please add your API key to the .env file.');
+    throw new Error('Gemini API key is not configured. Please add your API key to the .env file with the name VITE_GEMINI_API_KEY.');
   }
 
   const { text } = request;
